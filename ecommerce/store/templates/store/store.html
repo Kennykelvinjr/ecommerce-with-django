@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>Our Products</h1>
+    <ul>
+        {% for product in products %}
+            <li>
+                <h3><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></h3>
+                <p>TZS {{ product.price }}</p>
+                <p>{{ product.description }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

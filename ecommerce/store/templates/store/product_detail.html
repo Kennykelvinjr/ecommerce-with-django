@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="product-detail-container">
+        <h1>{{ product.name }}</h1>
+        <p><strong>Price:</strong> TZS {{ product.price }}</p>
+        <p><strong>Description:</strong> {{ product.description }}</p>
+        
+        <div class="buttons-container">
+            <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="1" min="1" class="quantity-input">
+                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+            </form>
+            <a href="{% url 'store' %}">Back to all products</a>
+        </div>
+    </div>
+{% endblock content %}
