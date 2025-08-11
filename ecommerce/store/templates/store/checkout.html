@@ -3,48 +3,73 @@
 
 {% block content %}
     <h1>Checkout</h1>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="box-element" id="form-wrapper">
-                <h4>Shipping Information</h4>
-                <form id="shipping-form" method="POST" action="">
-                    {% csrf_token %}
-                    <input type="hidden" name="orderId" value="{{ order.id }}">
-                    <div class="form-field">
-                        <input class="form-control" type="text" name="address" placeholder="Address/Street..">
+    <div class="checkout-container">
+        <div class="shipping-info">
+            <h2>Shipping Information</h2>
+            <form id="payment-form" action="{% url 'process_order' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-field">
+                    <label>Address:</label>
+                    <input class="form-control" type="text" name="address" placeholder="Shipping Address.." required>
+                </div>
+                <div class="form-field">
+                    <label>Phone Number:</label>
+                    <input class="form-control" type="text" name="phone_number" placeholder="Phone Number.." required>
+                </div>
+                <hr>
+                <div id="payment-element">
                     </div>
-                    <div class="form-field">
-                        <input class="form-control" type="text" name="city" placeholder="City..">
-                    </div>
-                    <div class="form-field">
-                        <input class="form-control" type="text" name="region" placeholder="Region..">
-                    </div>
-                    <div class="form-field">
-                        <input class="form-control" type="text" name="zipcode" placeholder="Zip code..">
-                    </div>
-                    <input id="form-button" class="btn btn-checkout" type="submit" value="Complete Order">
-                </form>
-            </div>
+                <button id="submit-button" class="btn btn-checkout">Place Order</button>
+            </form>
         </div>
-        <div class="col-lg-6">
-            <div class="box-element">
-                <h4>Order Summary</h4>
-                <div class="cart-row">
-                    {% for item in items %}
-                    <div class="cart-item">
-                        <div class="item-info">
-                            <h4>{{ item.product.name }}</h4>
-                            <p>Price: TZS {{ item.product.price }}</p>
-                            <p>Quantity: {{ item.quantity }}</p>
-                        </div>
-                        <p class="cart-item-total">TZS {{ item.get_total }}</p>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="order-total">
-                    <h4>Total: TZS {{ order.get_cart_total }}</h4>
-                </div>
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            {% for item in items %}
+            <div class="summary-item">
+                <p>{{ item.product.name }}</p>
+                <p>Quantity: {{ item.quantity }}</p>
+                <p>Price: TZS {{ item.get_total }}</p>
             </div>
+            {% endfor %}
+            <hr>
+            <p>Total Items: {{ order.get_cart_items }}</p>
+            <p>Total: TZS {{ order.get_cart_total }}</p>
         </div>
     </div>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var total = parseFloat("{{ order.get_cart_total }}");
+        var stripe = Stripe('{{ stripe_publishable_key }}');
+
+        fetch("{% url 'create_payment_intent' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ total: total }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var elements = stripe.elements({ clientSecret: data.clientSecret });
+            var paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+
+            var form = document.getElementById('payment-form');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: window.location.origin + window.location.pathname,
+                    }
+                }).then(function(result) {
+                    if (result.error) {
+                        alert(result.error.message);
+                    } else {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock content %}
