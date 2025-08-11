@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container-form">
+        <h2>Update Profile</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <h4>User Information</h4>
+            {{ u_form.as_p }}
+            <hr>
+            <h4>Additional Information</h4>
+            {{ p_form.as_p }}
+            <button class="btn btn-login" type="submit">Update</button>
+        </form>
+    </div>
+{% endblock content %}

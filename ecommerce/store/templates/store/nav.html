@@ -2,6 +2,21 @@
   <a class="nav-brand" href="{% url 'store' %}">E-Shop</a>
   <div class="nav-links">
     <a href="{% url 'cart' %}">Cart</a>
-    <a href="{% url 'checkout' %}">Checkout</a>
+    {% if user.is_authenticated %}
+        <div class="dropdown">
+            <button class="user-icon-btn">&#128100;</button>
+            <div class="dropdown-content">
+                <a href="{% url 'profile' %}">Profile</a>
+                <a href="{% url 'orders' %}">Orders</a>
+                <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-link-button">Logout</button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+    {% endif %}
   </div>
 </nav>

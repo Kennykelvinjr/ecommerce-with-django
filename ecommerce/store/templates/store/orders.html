@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>Your Orders</h1>
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <h3>Order #{{ order.id }}</h3>
+            <p><strong>Date Placed:</strong> {{ order.date_ordered }}</p>
+            <p><strong>Total:</strong> TZS {{ order.get_cart_total }}</p>
+            <hr>
+            <h4>Items:</h4>
+            <ul>
+                {% for item in order.orderitem_set.all %}
+                <li>
+                    <span>{{ item.quantity }} x {{ item.product.name }}</span>
+                    <span> - TZS {{ item.get_total }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You have no past orders.</p>
+    {% endif %}
+{% endblock content %}
